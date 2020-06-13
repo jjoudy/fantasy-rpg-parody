@@ -1,22 +1,28 @@
 //JESSICA JOUDY
 //for CSCI 169
 
+//Phaser.js requires that any loaded elements or assets be served over a web server. 
+//Simply opening index.html without a local server will cause all images or audio to not load. 
+//In development, I used the Visual Studio Code liveserver extension and the node.js http-server package to test.
+
 //CREDITS:
 //@icedcitruss on picrew for base art assets used for character creation (i.e. face shapes, hair shapes, etc.)
 //@szadiart on itch.io for tree backgrounds
 //Phaser.js free use assets for sky background
+//@hernandack on itch.io for full music
 //all used under the permission to use assets for personal + commercial use with credit
 
 //Keys for various assets:
 const BG = 'bg'; //lower tree background
 const TR = 'upper tree bg';
-const SKY = 'sky';
-const WITCH = 'witch';
-const DEMON = 'demon';
-const FAIRY = 'fairy';
+const SKY = 'sky grad';
+const WITCH = 'witch char';
+const DEMON = 'demon char';
+const FAIRY = 'fairy char';
+const MUSIC = 'song';
 
 //mutable to alter the gamestate
-let gameState = {} //the gamestate object that will hold all of our GameObjects
+let gameState = {} //the gamestate object that will hold all of our GameObjects, which are created in create()
 
 function preload () {
   // load in image: background and characters
@@ -25,12 +31,13 @@ function preload () {
   this.load.image(TR, 'assets/background5.png');
   this.load.image(SKY, 'assets/skygradient.png');
   this.load.image(DEMON, 'assets/demon.png');
-  this.load.image(WITCH,    'assets/witch.png');
+  this.load.image(WITCH, 'assets/witch.png');
   this.load.image(FAIRY, 'assets/fairy.png');
 
   //load in music and audio
-  //if time permits
-  //this.load.audio(key, urls), mp3 vs ogg formats
+  //this.load.audio(key, urls), ogg format for easier loading time
+  //BNW loop is a 15 second cut of Brand New Wisdom.ogg
+  this.load.audio(MUSIC, ['assets/BNW_loop.ogg'] );
 }
 
 
@@ -56,10 +63,24 @@ function create() {
   gameState.background5 = this.add.image(000, 220, BG);
   gameState.background5.setOrigin(0,0);
 
+  const music_config = {
+    mute: false,
+    volume: 1,
+    rate: 1,
+    detune: 0,
+    seek: 0,
+    loop: true,
+    delay: 0
+  }
+
+  //play audio on loop
+  let sfx = this.sound.add(MUSIC);
+  sfx.play(music_config);
+
   //create the game: render the first character and display the first page
   
   initializePage(this); //this = scene, create the options and narrative_background
-  let firstPage = fetchPage(1); //load the first page
+  let firstPage = getPage(1); //load the first page
   displayPage(this, firstPage); //display the first page
   
 }
@@ -68,7 +89,7 @@ function renderCharacter(scene, key) {
   if(gameState.character){
     gameState.character.destroy();
   }
-   gameState.character = scene.add.image(550, 360, key);
+  gameState.character = scene.add.image(550, 360, key);
   gameState.character.setOrigin(1, 1);
   gameState.character.setScale(.5);
 }
@@ -123,7 +144,7 @@ function displayPage(scene, page) {
     optionBox.strokeWeight = 2;
     optionBox.strokeAlpha = 1;
     optionBox.isStroked = true;
-    optionBox.setOrigin(0, 0)
+    optionBox.setOrigin(0, 0);
 
     //add the option text
     const optionText = scene.add.text(baseX, 480, option.option, { fontSize:14, fill: '#75e3ff', align: 'center', wordWrap: {width: 110}});
@@ -143,7 +164,7 @@ function displayPage(scene, page) {
       //if the new page exists, destroy the current page and fetch the new page
       if(newPage !== undefined){
         destroyPage();
-        displayPage(scene, fetchPage(newPage));
+        displayPage(scene, getPage(newPage));
       }
     }, { option });
     
@@ -188,7 +209,7 @@ const config = {
 //phaser.js syntax to start a game
 const game = new Phaser.Game(config);
 
-function fetchPage(page) {
+function getPage(page) {
 
   //the array of pages that dictate the story
   //each page is an anonymous object: labelled with the character key, the page number, the narrative (text), and response options
@@ -199,7 +220,7 @@ function fetchPage(page) {
       page: 1,
       narrative: 'GIRL: Excuse me. Helloooo? What are you doing in my side of the forest?',
       options: [
-        { option: 'Say Hello',   nextPage: 2 },
+        { option: 'Hello there.',   nextPage: 2 },
         { option: 'AH, WITCH!',   nextPage: 3 },
       ]
     },
@@ -220,7 +241,7 @@ function fetchPage(page) {
       page: 3,
       narrative: 'WITCH: Ugh, this again! How many times do I have to say it, I only practice ethical dark magic! ETHICAL!',
       options: [
-        { option: 'Apologize',     nextPage: 7 },
+        { option: 'Oops... Sorry.',     nextPage: 7 },
         { option: 'Ethical???',   nextPage: 8 },
       ]
     },
@@ -228,10 +249,10 @@ function fetchPage(page) {
     {
       character: WITCH,
       page: 4,
-      narrative: 'WITCH: I can do cool magic! Want to see?',
+      narrative: 'WITCH: I can do cool magic. Want to see?',
       options: [
         { option: 'Yes, please!',   nextPage: 10 },
-        { option: 'Hmmm... no thank you.',   nextPage: 11 },
+        { option: 'Hmmm... no, thank you.',   nextPage: 11 },
         { option: 'AGH! Scary witch!', nextPage: 3 }
       ]
     },
@@ -260,7 +281,7 @@ function fetchPage(page) {
       page: 7,
       narrative: 'WITCH: That\'s much better. Still, I\'d like it if you leave soon.',
       options: [
-        { option: 'Can I get to know you?',   nextPage: 11 },
+        { option: 'Can we be friends?',   nextPage: 11 },
         { option: 'No! You leave!',   nextPage: 6 },
       ]
     },
@@ -341,7 +362,7 @@ function fetchPage(page) {
       page: 15,
       narrative: 'FAIRY: Wings are just a myth. Want to know more about fairies?',
       options: [
-        { option: 'Yes please',   nextPage: 16 },
+        { option: 'Yes, please',   nextPage: 16 },
         { option: 'Magic!', nextPage: 14 }
       ]
     },
@@ -397,7 +418,7 @@ function fetchPage(page) {
       page: 21,
       narrative: 'DEMON: Hehehe...',
       options: [
-        { option: 'Well that was unexpected.',   nextPage: 22 },
+        { option: 'Well, that was unexpected.',   nextPage: 22 },
         { option: 'DEMON! EVIL DEMON!',   nextPage: 23 },
       ]
     },
@@ -457,16 +478,16 @@ function fetchPage(page) {
       page: 27,
       narrative: 'The DEMON assures YOU that he has cursed the mean WITCH who kicked YOU out. She now has warts. YOU are forever in his debt.',
       options: [
-        { option: 'Celebrate your vengeance',   nextPage: 41 },
+        { option: 'Celebrate vengeance',   nextPage: 41 },
       ]
     },
     
     {
       character: DEMON,
       page: 28,
-      narrative: 'YOU learn that the DEMON likes fantasy jazz and rare steak. He offers YOU some. You decline, but he doesn\'t turn YOU into a frog. so it\'s a win.',
+      narrative: 'YOU learn that the DEMON likes fantasy jazz and rare steak. He offers YOU some, and he doesn\'t turn YOU into a frog. so it\'s a win.',
       options: [
-        { option: 'Celebrate your non-froginess',   nextPage: 41 },
+        { option: 'Celebrate non-froginess',   nextPage: 41 },
       ]
     },
 
