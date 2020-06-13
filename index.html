@@ -1,6 +1,10 @@
 <!-- JESSICA JOUDY -->
 <!-- for CSCI 169 -->
 
+
+<!-- Note: Phaser requires all files to be served on a web server-->
+<!-- Images will not load correctly if not using a web server -->
+<!-- I am using the Visual Studio Code liveserver extension to develop the page -->
 <!doctype html>
 <html>
     <head>
@@ -9,12 +13,13 @@
         <title>Untitled Fantasy Game</title>
         <!-- phaser.js functionality -->
         <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
-        <!-- include the game -->
+        <!-- include the game script-->
         <script src="game.js"></script>
     </head>
    
     <body>
         <!-- where the phaser game of game.js loads -->
         <div id="phaser-game"></div>
+        <p>Note: if images and music do not load, please serve over a local web server</p>
     </body>
 </html>
